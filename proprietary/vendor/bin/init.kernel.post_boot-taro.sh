@@ -187,6 +187,14 @@ function configure_read_ahead_kb_values() {
 	else
 		ra_kb=512
 	fi
+
+	# change wly&baize read_ahead_kb set 8 for background_ra_pages
+	product_id=`getprop ro.boot.prjname`
+	case "$product_id" in
+		"21001"|"21201"|"20846")
+		echo 8 > /sys/module/oplus_bsp_dynamic_readahead/parameters/background_ra_pages
+	esac
+
 	if [ -f /sys/block/mmcblk0/bdi/read_ahead_kb ]; then
 		echo $ra_kb > /sys/block/mmcblk0/bdi/read_ahead_kb
 	fi
