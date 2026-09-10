@@ -229,24 +229,9 @@ function configure_memory_parameters() {
 	#
 	MemTotalStr=`cat /proc/meminfo | grep MemTotal`
 	MemTotal=${MemTotalStr:16:8}
-	prjname=`getprop ro.boot.prjname`
-	# configure boost pool
-	if [ -n "$prjname" ]; then
-		case $prjname in
-			"21001"|"21201"|"20846"|"20847")
-			if [ $MemTotal -gt 8388608 ]; then
-				echo 128000 > /proc/boost_pool/camera_pages
-			fi
-			;;
-		*)
-			echo "$prjname:no special config<camera_pages>"
-			;;
-		esac
-	fi
 #ifdef OPLUS_FEATURE_ZRAM_OPT
 	# For vts test which has replace system.img
-	ls -l /product | grep '\-\>'
-	if [ $? -eq 0 ]; then
+	if [ -L "/product" ]; then
 		oplus_configure_zram_parameters
 	else
 		if [ -f /sys/block/zram0/hybridswap_enable ]; then
@@ -347,6 +332,7 @@ echo 0 > /proc/sys/kernel/sched_util_clamp_min_rt_default
 
 # Limit kswapd in cpu0-6
 echo `ps -elf | grep -v grep | grep kswapd0 | awk '{print $2}'` > /dev/cpuset/kswapd-like/tasks
+echo `ps -elf | grep -v grep | grep kcompactd0 | awk '{print $2}'` > /dev/cpuset/kswapd-like/tasks
 
 # configure governor settings for silver cluster
 echo "walt" > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
@@ -517,5 +503,9 @@ esac
 chown -h system.system /sys/devices/system/cpu/cpufreq/policy0/schedutil/target_loads
 chown -h system.system /sys/devices/system/cpu/cpufreq/policy4/schedutil/target_loads
 chown -h system.system /sys/devices/system/cpu/cpufreq/policy7/schedutil/target_loads
+
+#config fg and top cpu shares
+echo 5120 > /dev/cpuctl/top-app/cpu.shares
+echo 4096 > /dev/cpuctl/foreground/cpu.shares
 
 setprop vendor.post_boot.parsed 1

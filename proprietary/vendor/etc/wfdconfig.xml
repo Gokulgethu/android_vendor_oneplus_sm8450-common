@@ -136,7 +136,7 @@
             Standby Resume capability is supported
         -->
         <StandbyResumeCapability>
-            <Valid>1</Valid>
+            <Valid>0</Valid>
         </StandbyResumeCapability>
 
         <!--
